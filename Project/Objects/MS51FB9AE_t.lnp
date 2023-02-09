@@ -1,0 +1,9 @@
+".\Objects\main.obj",
+".\Objects\isp_uart1.obj",
+".\Objects\sys.obj",
+".\Objects\uart.obj",
+".\Objects\delay.obj",
+".\Objects\STARTUP.obj" 
+TO ".\Objects\MS51FB9AE_t" 
+
+PRINT(".\Listings\MS51FB9AE_t.map") REMOVEUNUSED 

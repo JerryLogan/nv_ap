@@ -1,0 +1,215 @@
+C51 COMPILER V9.60.7.0   MAIN                                                              02/09/2023 18:02:21 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE ..\User\main.c LARGE OMF2 OPTIMIZE(8,SPEED) BROWSE INCDIR(..\Library\Dev
+                    -ice\Include;..\Library\StdDriver\inc) DEBUG PRINT(.\Listings\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include "MS51_16K.H"
+   2          #include "isp_uart1.h"
+   3          
+   4          /**
+   5           ******************************************************************************
+   6           *@Pin Definition
+   7           * stm8s003             //novuton
+   8           * PA1 PWR_ON_INT       //p3.0
+   9           * PA2 MCU_UPDATE       //p1.7
+  10           * PB4 GAUGE_SCL        //p1.3
+  11           * PB5 GAUGE_SDA        //p1.4
+  12           * PC4 BAT_DET_LED_R    //p1.1
+  13           * PC5 BAT_DET_LED_G    //p1.0
+  14           * PC7 BAT_DET_LED_O    //p0.1
+  15           * PC6 interrupt        //p0.0
+  16           *
+  17           ******************************************************************************
+  18           */
+  19           
+  20           
+  21          
+  22          #define Debug_EVB               //EVB MS51FB
+  23          #define RED_LED_ON      0x52
+  24          #define GREEN_LED_ON    0x47
+  25          #define ORANGE_LED_ON   0x4F
+  26          #define RED_LED_OFF     0x72
+  27          #define GREEN_LED_OFF   0x67
+  28          #define ORANGE_LED_OFF  0x6F
+  29          //#define CMD_GET_FWVER   0xF0  //reserve 0xF0~0xFE
+  30          #define POWER_OFF_MODE  0x00
+  31          #define POWER_ON_MODE   0x01
+  32          #define FW_VER          0xA5 //A=DPB30, B=DPB60, C=DPB70; Ver=5
+  33          #define CMD_NOT_SUPPORT 0xFF
+  34          
+  35          static uint8_t power_mode = POWER_OFF_MODE;
+  36          uint8_t ReceivedData = 0;
+  37          
+  38          void myDelay(unsigned int value);
+  39          void UART1_Config(void); 
+  40          void InitLEDPins(void);
+  41          void ResetLEDPins(void);
+  42          void GPIO_Config(void);
+  43          
+  44          void GPIO_Config(void)
+  45          {
+  46   1      #ifdef Debug_EVB
+  47   1        P12_QUASI_MODE;//evb LED
+  48   1      #else
+                P01_QUASI_MODE;//Orange
+                P10_QUASI_MODE;//Green
+                P11_QUASI_MODE;//Red
+                P30_QUASI_MODE;//PWR_ON_INT
+                P17_QUASI_MODE;//MCU_UPDATE
+              #endif
+C51 COMPILER V9.60.7.0   MAIN                                                              02/09/2023 18:02:21 PAGE 2   
+
+  55   1      }
+  56          
+  57          void InitLEDPins(void)
+  58          {
+  59   1      #ifdef Debug_EVB
+  60   1        P12_QUASI_MODE;//evb LED
+  61   1      #else
+                P01_QUASI_MODE;//Orange
+                P10_QUASI_MODE;//Green
+                P11_QUASI_MODE;//Red
+              #endif
+  66   1        ResetLEDPins();
+  67   1      }
+  68          
+  69          void ResetLEDPins(void)
+  70          {
+  71   1        //Turn off LED
+  72   1      #ifdef Debug_EVB
+  73   1        P12 = 0x00;//EVB
+  74   1      #else
+                P01 = 0x00;//Orange
+                P10 = 0x00;//Green
+                P11 = 0x00;//Red
+              #endif
+  79   1      }
+  80          void myDelay(unsigned int value)
+  81          {
+  82   1        //16MHz, 5 clock cycles
+  83   1        unsigned int i;
+  84   1        unsigned int j;
+  85   1        for(i = 0; i < value; i++)
+  86   1          for(j = 0; j < 1600; j++); 
+  87   1      }
+  88          
+  89          void UART1_Config(void)
+  90          {
+  91   1        P06_QUASI_MODE;//UART0_TX
+  92   1        P07_INPUT_MODE;//UART0_RX
+  93   1        UART_Open(16000000,UART0,9600);
+  94   1      }
+  95          
+  96          void main() {
+  97   1      
+  98   1        /*Clock configuration */
+  99   1        MODIFY_HIRC(HIRC_16);//16Mhz
+ 100   1        
+ 101   1        /*GPIO configuration */
+ 102   1        GPIO_Config();
+ 103   1      
+ 104   1        
+ 105   1        /*I2C configuration */
+ 106   1        //todo I2C_GasGauge_Init();
+ 107   1        
+ 108   1        /*LED GPIO configuration */
+ 109   1        InitLEDPins();
+ 110   1      
+ 111   1        if(0)//todo(!(GPIOA->IDR&(1<<1)))
+ 112   1        {
+ 113   2          power_mode = POWER_OFF_MODE;
+ 114   2          //todo EXTI_SetExtIntSensitivity(EXTI_PORT_GPIOC, EXTI_SENSITIVITY_FALL_ONLY);
+ 115   2        }
+ 116   1        else
+C51 COMPILER V9.60.7.0   MAIN                                                              02/09/2023 18:02:21 PAGE 3   
+
+ 117   1        {
+ 118   2          power_mode = POWER_ON_MODE;
+ 119   2          /*UART1 configuration */
+ 120   2          UART1_Config();
+ 121   2        }
+ 122   1      
+ 123   1        while(1)
+ 124   1        {
+ 125   2          if(power_mode == POWER_ON_MODE) {
+ 126   3            ReceivedData = 0;
+ 127   3            ReceivedData = Receive_Data(UART0);
+ 128   3            ENABLE_UART0_PRINTF;
+ 129   3      /*
+ 130   3      P01 = 0x00;//Orange
+ 131   3      P10 = 0x00;//Green
+ 132   3      P11 = 0x00;//Red
+ 133   3      */
+ 134   3            switch(ReceivedData)
+ 135   3            {
+ 136   4              case RED_LED_ON:
+ 137   4                P11 = 0xff;//Red
+ 138   4      #ifdef Debug_EVB
+ 139   4                P12 = 0xff;//Red
+ 140   4      #endif
+ 141   4                break;
+ 142   4              case GREEN_LED_ON:
+ 143   4                P10 = 0xff;//Green
+ 144   4                break;
+ 145   4              case ORANGE_LED_ON:
+ 146   4                P01 = 0xff;//Orange
+ 147   4                break;
+ 148   4              case RED_LED_OFF:
+ 149   4                P11 = 0x00;//Red
+ 150   4      #ifdef Debug_EVB
+ 151   4                P12 = 0x00;//Red
+ 152   4      #endif
+ 153   4                break;
+ 154   4              case GREEN_LED_OFF:
+ 155   4                P10 = 0x00;//Green
+ 156   4                break;
+ 157   4              case ORANGE_LED_OFF:
+ 158   4                P01 = 0x00;//Orange
+ 159   4                break;
+ 160   4              case CMD_GET_FWVER:
+ 161   4                //todo Transmit(FW_VER);
+ 162   4                break;
+ 163   4              
+ 164   4              default:
+ 165   4                //todo Transmit(CMD_NOT_SUPPORT);
+ 166   4                break;
+ 167   4            }
+ 168   3          } else {
+ 169   3            ResetLEDPins();
+ 170   3            //todo halt();
+ 171   3          }
+ 172   2          
+ 173   2          /*
+ 174   2          P12 = 0xff;
+ 175   2          myDelay(100);
+ 176   2          P12 = 0x00;
+ 177   2          myDelay(100);
+ 178   2          */
+C51 COMPILER V9.60.7.0   MAIN                                                              02/09/2023 18:02:21 PAGE 4   
+
+ 179   2        }
+ 180   1      }
+*** WARNING C294 IN LINE 113 OF ..\User\main.c: unreachable code
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    263    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =      2    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)
