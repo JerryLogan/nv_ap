@@ -7,7 +7,7 @@
 
   <Targets>
     <Target>
-      <TargetName>MS51FB9AE_t</TargetName>
+      <TargetName>MS51FB9AE_AP</TargetName>
       <ToolsetNumber>0x0</ToolsetNumber>
       <ToolsetName>MCS-51</ToolsetName>
       <uAC6>0</uAC6>
@@ -46,7 +46,7 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>.\Objects\</OutputDirectory>
-          <OutputName>MS51FB9AE_t</OutputName>
+          <OutputName>MS51FB9AE_AP</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
@@ -173,7 +173,7 @@
             <RunIndependent>0</RunIndependent>
             <UpdateFlashBeforeDebugging>0</UpdateFlashBeforeDebugging>
             <Capability>1</Capability>
-            <DriverSelection>4102</DriverSelection>
+            <DriverSelection>4103</DriverSelection>
           </Flash1>
           <bUseTDR>0</bUseTDR>
           <Flash2>BIN\Nuvoton_8051_Keil_uVision_Driver.dll</Flash2>
@@ -381,11 +381,11 @@
               <FileType>1</FileType>
               <FilePath>..\User\main.c</FilePath>
             </File>
-            <File>
-              <FileName>isp_uart1.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\User\isp_uart1.c</FilePath>
-            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Library</GroupName>
+          <Files>
             <File>
               <FileName>sys.c</FileName>
               <FileType>1</FileType>
@@ -396,15 +396,15 @@
               <FileType>1</FileType>
               <FilePath>..\Library\StdDriver\src\uart.c</FilePath>
             </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>Library</GroupName>
-          <Files>
             <File>
-              <FileName>delay.c</FileName>
+              <FileName>isp_uart1.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Library\StdDriver\src\delay.c</FilePath>
+              <FilePath>..\User\isp_uart1.c</FilePath>
+            </File>
+            <File>
+              <FileName>i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Library\StdDriver\src\i2c.c</FilePath>
             </File>
           </Files>
         </Group>
