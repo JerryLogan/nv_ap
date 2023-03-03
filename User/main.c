@@ -165,10 +165,18 @@ void I2C_Read_Process(UINT8 u8DAT)//read 0x2c(soc register) from RT9426A
 	
 	iData = I2DAT;
 	
+	//TS_Eric 20230303 Must clr AA after read data
+	clr_I2CON_AA;
+	clr_I2CON_SI;
+	while(!SI);
+	if (I2STAT != 0x58)              
+       I2C_Error();
+	
+	
 	/* Step16 */
-    set_I2CON_STO;
-    clr_I2CON_SI;
-	I2C0_SI_Check();
+  set_I2CON_STO;
+  clr_I2CON_SI;
+	while (STO);
 
 }
 
