@@ -1,6 +1,7 @@
 #define CMD_CONNECT          0xAE
 #define CMD_SYNC_PACKNO      0xA4
-#define CMD_GET_FWVER        0xA6
+//#define CMD_GET_FWVER        0xA6
+#define CMD_GET_FWVER        0xF0 //TS_JerryLo 20230307 Follow novatek fw define in UISTM8S_APP.h
 #define FW_VERSION           0x28
 #define CMD_RUN_APROM        0xAB
 #define CMD_GET_DEVICEID     0xB1
